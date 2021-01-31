@@ -416,7 +416,7 @@
 
 
 
-<div class="swiper-length" style="display: none;">0</div>
+<div class="swiper-length" style="display: none;">1</div>
 <div id="appSwiper"
   class="swiper-no-swiping"
   @mouseenter="stopAutoPlay()" 
@@ -424,28 +424,40 @@
 >
   <swiper v-cloak ref="mySwiper" :options="swiperOptions" @slideChangeTransitionEnd="slideChangeTransitionEnd">
     
-      <swiper-slide>
-        <div class="item swiper-lazy" data-background="/DalyJiangBlog.github.io/medias/1.jpg" style="background-size: 90000px; 
-          background-position: center center;" style="position: relative;">
-          <div class="swiper-bgmask" style="position: absolute;top: 0;left: 0;width: 100%;height: 100%;"></div>
-            <div class="flag">
-              <div class="img-mask swiper-lazy" data-background="/DalyJiangBlog.github.io/medias/1.jpg" style="height: 100%; background-size: cover; 
-                background-position: center center;">
-                <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div>   
-              </div>
-              <div class="flag-text">
-                <div>
-                  <div class="title ani animated" swiper-animate-effect="fadeInDown" swiper-animate-duration="0.2s" swiper-animate-delay="0.1s">Hexo-theme-Bamboo</div>
-                  <div class="excerpt ani animated" swiper-animate-effect="fadeInDown" swiper-animate-duration="0.2s" swiper-animate-delay="0.1s">大家好，这是一个Hexo主题，希望这款主题能得到你的喜爱</div>
+      
+        
+        
+          
+          <swiper-slide>
+            <div class="item swiper-lazy" data-background="https://ssyerv1.oss-cn-hangzhou.aliyuncs.com/picture/c080ff4434354e35af9dab0a3ee1b9f7.jpg!sswm" style=" background-size: 90000px; 
+            background-position: center center;" style="position: relative;">
+            <div class="swiper-bgmask" style="position: absolute;top: 0;left: 0;width: 100%;height: 100%;"></div>
+              <div class="flag" style="z-index: 2;">
+                <div class="img-mask swiper-lazy" data-background="https://ssyerv1.oss-cn-hangzhou.aliyuncs.com/picture/c080ff4434354e35af9dab0a3ee1b9f7.jpg!sswm" style="height: 100%; background-size: cover; 
+                  background-position: center center;">
+                  <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div>  
                 </div>
-                <div style="display: flex;">
-                  <div class="ani animated" swiper-animate-effect="fadeInDown" swiper-animate-duration="0.2s" swiper-animate-delay="0.1s"><a target="_blank" rel="noopener" href="https://github.com/yuang01/hexo-theme-bamboo" class="read-more border-color swiper-btn-color" style="display: inline-block; z-index:1;">阅读更多</a></div>
-                  <div class="ani animated" style="margin-left: 10px;" swiper-animate-effect="fadeInDown" swiper-animate-duration="0.2s" swiper-animate-delay="0.1s"><a target="_blank" rel="noopener" href="https://github.com/yuang01/hexo-theme-bamboo" class="read-more " style="display: inline-block; z-index:1;border: 1px solid white;">Download theme</a></div>
+                <div class="flag-text">
+                  <div>
+                    <div class="title ani animated" swiper-animate-effect="fadeInDown" swiper-animate-duration="0.2s" swiper-animate-delay="0.1s">Testing</div>
+                    <div class="excerpt ani animated" swiper-animate-effect="fadeInDown" swiper-animate-duration="0.2s" swiper-animate-delay="0.1s">我是文章内容
+1、消息队列消息重复问题如何解决？剖析：首先，比如rabbitmq, rocketmq, kafka, 都有可能出现消费重复的问题，正常，因为这个问题通常不是mq自己保证的，是给你保证的。
+举个例子：假设你有个系统，消费一条往</div>
+                  </div>
+                  <div class="ani animated" swiper-animate-effect="fadeInDown" swiper-animate-duration="0.2s" swiper-animate-delay="0.1s"><a href="/DalyJiangBlog.github.io/2021/01/31/testing/" class="read-more border-color swiper-btn-color" style="display: inline-block; z-index:1;">阅读更多</a></div>
                 </div>
               </div>
             </div>
-          </div>
-      </swiper-slide>
+
+          </swiper-slide>
+        
+      
+        
+        
+      
+    <div class="swiper-pagination" slot="pagination" style="display: none;"></div>
+    <div class="swiper-button-prev swiper-button-white" slot="button-prev" style="display: none;"></div>
+    <div class="swiper-button-next swiper-button-white" slot="button-next" style="display: none;"></div>
     
   </swiper>
 </div>
@@ -690,6 +702,8 @@
 		
 			
 		
+			
+		
 	</div>
 </div>
 
@@ -699,6 +713,52 @@
 <section class="posts">
   
     <article class="post" data-aos="fade-up" style="flex-direction: row-reverse;">
+      <div class="post-main">
+        <div class="post-info">
+          <div class="post-time">
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+            <span class="post-time">2021-01-31</span>
+          </div>
+          <div class="post-title">
+            <a class="post-title-link" href="/DalyJiangBlog.github.io/2021/01/31/testing/">Testing</a>
+          </div>
+          <div class="post-meta">
+            <div class="post-tags">
+              
+            </div>
+            <div class="post-categories">
+              
+            </div>
+          </div>
+          <div class="post-img-mobile">
+            
+              <a href="/DalyJiangBlog.github.io/2021/01/31/testing/" class="lazyload" data-original="https://ssyerv1.oss-cn-hangzhou.aliyuncs.com/picture/c080ff4434354e35af9dab0a3ee1b9f7.jpg!sswm" style="background-size: cover; 
+                background-position: center center;">
+              </a>
+            
+          </div>
+          <div class="post-content">
+            我是文章内容
+1、消息队列消息重复问题如何解决？剖析：首先，比如rabbitmq, rocketmq, kafka, 都有可能出现消费重复的问题，正常，因为这个问题通常不是mq自己保证的，是给你保证的。
+举个例子：假设你有个系统，消费一条往
+          </div>
+        </div>
+        <div class="post-more">
+          <a href="/DalyJiangBlog.github.io/2021/01/31/testing/">
+            <i class="iconfont iconmore" style="float: right;" title="阅读更多"></i>
+          </a>
+        </div>
+      </div>
+      <div class="post-img">
+        
+          <a href="/DalyJiangBlog.github.io/2021/01/31/testing/" class="lazyload" data-original="https://ssyerv1.oss-cn-hangzhou.aliyuncs.com/picture/c080ff4434354e35af9dab0a3ee1b9f7.jpg!sswm" style="background-size: cover; 
+            background-position: center center;">
+          </a>
+        
+      </div>
+    </article>
+  
+    <article class="post" data-aos="fade-up" style="">
       <div class="post-main">
         <div class="post-info">
           <div class="post-time">
@@ -730,7 +790,7 @@
         </div>
         <div class="post-more">
           <a href="/DalyJiangBlog.github.io/2021/01/31/hello-world/">
-            <i class="iconfont iconmore" style="float: right;" title="阅读更多"></i>
+            <i class="iconfont iconmore" style="" title="阅读更多"></i>
           </a>
         </div>
       </div>

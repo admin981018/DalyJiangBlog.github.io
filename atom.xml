@@ -6,7 +6,7 @@
   <link href="https://admin981018.github.io/DalyJiangBlog.github.io/atom.xml" rel="self"/>
   
   <link href="https://admin981018.github.io/DalyJiangBlog.github.io/"/>
-  <updated>2021-01-31T08:42:51.298Z</updated>
+  <updated>2021-01-31T09:43:45.570Z</updated>
   <id>https://admin981018.github.io/DalyJiangBlog.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Testing</title>
+    <link href="https://admin981018.github.io/DalyJiangBlog.github.io/2021/01/31/testing/"/>
+    <id>https://admin981018.github.io/DalyJiangBlog.github.io/2021/01/31/testing/</id>
+    <published>2021-01-31T09:42:08.790Z</published>
+    <updated>2021-01-31T09:43:45.570Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;我是文章内容&lt;/p&gt;
+&lt;h4 id=&quot;1、消息队列消息重复问题如何解决？&quot;&gt;&lt;a href=&quot;#1、消息队列消息重复问题如何解决？&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>Hello World</title>

@@ -10,7 +10,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>Hello World | Share Blog</title>
+  <title>Testing | Share Blog</title>
   
     
 <link rel="stylesheet" href="/DalyJiangBlog.github.io/js/aos/aos.css">
@@ -414,12 +414,12 @@
       
 
 
-<div class="post-detail-header lazyload" id="thumbnail_canvas" data-original="/DalyJiangBlog.github.io/medias/7.jpg" style="background-repeat: no-repeat; background-size: cover; 
+<div class="post-detail-header lazyload" id="thumbnail_canvas" data-original="/DalyJiangBlog.github.io/medias/12.jpg" style="background-repeat: no-repeat; background-size: cover; 
   background-position: center center;position: relative;">
   <div class="post-detail-header-mask"></div>
   <canvas id="header_canvas"style="position:absolute;bottom:0"></canvas>
   
-    <span class="title">Hello World</span>
+    <span class="title">Testing</span>
   
 </div>
 
@@ -439,19 +439,154 @@
         
       </div>
       <div class="post-content">
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><pre class=" language-bash"><code class="language-bash">$ hexo new <span class="token string">"My New Post"</span>
+        <p>我是文章内容</p>
+<h4 id="1、消息队列消息重复问题如何解决？"><a href="#1、消息队列消息重复问题如何解决？" class="headerlink" title="1、消息队列消息重复问题如何解决？"></a>1、消息队列消息重复问题如何解决？</h4><p>剖析：首先，比如rabbitmq, rocketmq, kafka, 都有可能出现消费重复的问题，正常，因为这个问题通常不是mq自己保证的，是给你保证的。</p>
+<p>举个例子：假设你有个系统，消费一条往数据库里插入一条，要是重复消费了两次，你就插入了两条，这个数据不就错了？但是如果你在第二次消费的时候进行判断一下，如果已经消费过了就直接扔了，不就保留下一条数据？</p>
+<p>一条数据重复出现两次，数据库里就只有一条数据，这就保证了系统的幂等性。</p>
+<p>幂等性通俗点来说就是一个数据、或者一个请求，给你重复请求多次，你得确保对应的数据不会发生改变，不能出错，这就是幂等性。</p>
+<blockquote>
+<p>消息重复的原因有两个：</p>
+<p>​        1.生产时消息重复：由于生产者发送消息给mq，在mq确认的时候出现网络波动，生产者没有收到确认，实际上mq已经接受到了消息，这个时候生产者就会重新发送一遍这个消息。</p>
+<p>​        2.消费时消息重复。消费者消费成功后，在mq确认的时候出现网络波动，mq没有接收到确认，为了保证消息被消费，mq就会继续给消费者投递之前的消息，这时候消费者就接收到了两条一样消息。</p>
+</blockquote>
+<blockquote>
+<p>Redis锁机制实现</p>
+<p>方式一： Redis的setNX()，做消息id去重。</p>
+<pre class=" language-java"><code class="language-java"><span class="token comment" spellcheck="true">//Redis中操作，判断是否已经操作过 TODO</span>
+<span class="token keyword">boolean</span> flag <span class="token operator">=</span>  jedis<span class="token punctuation">.</span><span class="token function">setNX</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>flag<span class="token punctuation">)</span><span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//消费</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span><span class="token keyword">else</span><span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//忽略，重复消费</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
 </code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><pre class=" language-bash"><code class="language-bash">$ hexo server
+<p>方式二：redis的Incr原子操作：这种加锁的思路是， key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 INCR 操作进行加一。<br>然后其它用户在执行 INCR 操作进行加一时，如果返回的数大于 1 ，说明这个锁正在被使用当中。</p>
+<pre class=" language-java"><code class="language-java"><span class="token keyword">int</span> num <span class="token operator">=</span>  jedis<span class="token punctuation">.</span><span class="token function">incr</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>num <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//消费</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span><span class="token keyword">else</span><span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//忽略，重复消费</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
 </code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><pre class=" language-bash"><code class="language-bash">$ hexo generate
+</blockquote>
+<h4 id="2、什么是TTL队列、什么是死信队列？"><a href="#2、什么是TTL队列、什么是死信队列？" class="headerlink" title="2、什么是TTL队列、什么是死信队列？"></a>2、什么是TTL队列、什么是死信队列？</h4><blockquote>
+<p>TTL：Time To Live的缩写，也就是生存时间。RabbitMQ支持消息的过期时间，在消息发送时可以进行指定。RabbitMQ支持队列的过期时间，从消息入队列开始计算，只要超过了队列的超时时间配置，那么消息会自动的清除。</p>
+<p>死信队列：没有被及时消费的消息存放的队列</p>
+<p>消息没有被即时消费的原因：</p>
+<ol>
+<li>消息被拒绝（basid.reject/ basic.nack）并且不再重新投递requeue = false</li>
+<li>TTL消息超时未被消费。</li>
+<li>达到最大队列的长度。        </li>
+</ol>
+</blockquote>
+<h4 id="3、存储引擎了解多少？MyISAM是怎么实现的？为什么就不能支持事务？"><a href="#3、存储引擎了解多少？MyISAM是怎么实现的？为什么就不能支持事务？" class="headerlink" title="3、存储引擎了解多少？MyISAM是怎么实现的？为什么就不能支持事务？"></a>3、存储引擎了解多少？MyISAM是怎么实现的？为什么就不能支持事务？</h4><blockquote>
+<p>存储引擎是数据库存取方式，不同的存储引擎对数据有着不同的管理方式，在MySQL中使用较多的两种数据引擎是Innodb和MyISAM</p>
+<p>索引：索引是存储在数据库底层的一种数据结构，他可以使得数据库查询的效率提升，而MySQL的索引使用的是B+树。</p>
+<p>1、B+树</p>
+<p>B+树是一颗多路树，其父节点的每一个元素都会出现在子节点中，是子节点的的最大值或者最小值，根节点的最大元素就等同于子节点的最大元素，所以无论插入多少元素，最大元素始终要保持包含在根节点中，而因为父节点中的元素全部都要出现在子节点中，所以所有的叶子节点包含了全部的节点信息，每个叶子节点都有指向下一节点的指针，形成一个有序的链表。</p>
+<p>索引的分类：</p>
+<p>聚集索引：</p>
+<p>聚集索引是指索引在建立时会将数据同时存储在索引中，也就是说，在查找到索引时，数据也就被同步查找到了，聚集索引的差别可以和非聚集索引对比着看。</p>
+<p>非聚集索引：</p>
+<p>非聚集索引是指建立索引时，数据不存储到索引中，索引中仅存储数据的地址，所以当在索引中查到数据时，我们还需要按照其存储的地址去查找数据。</p>
+<p>索引实现过程：</p>
+<p>而B+树的好处就体现在查询上，在单元素查询时，B+树向下逐层查找节点，最终匹配到叶子节点，如果是<strong>聚集索引</strong>就直接取值，如果是<strong>非聚集索引</strong>则根据地址取值。</p>
+<p>InnoDB  B+树   索引结构存放数据了<br>MyISAM B+数据 索引和数据分开  每条SQL语句都是原子操作</p>
+</blockquote>
+<h4 id="4、深度分页原理，深度分页会有什么问题"><a href="#4、深度分页原理，深度分页会有什么问题" class="headerlink" title="4、深度分页原理，深度分页会有什么问题"></a>4、深度分页原理，深度分页会有什么问题</h4><blockquote>
+<p>1、ES分页搜索</p>
+<p>Elasticsearch分页搜索采用的是from+size。 from表示查询结果的起始下标，size表示从起始下标开始返回文档的个数。</p>
+<p>2、什么是深分页？</p>
+<p>简单的来说就是搜索的特别深，比如说总共有60000条数据，三个primary shard，每个shard上分了20000条数据，每页是十条数据，这个时候，需要搜索到1000页，实际上要拿到的是10001~10010。</p>
+<p>3、from+size深度分页原理</p>
+<p>如果你想查询第5000-5100数据，查询官网API你很容易就知道，发送如下查询条件就可以做到：</p>
+<p>POST auditlog_operation/operlog/_search</p>
+<p>{</p>
+<p>“from”:5000 //from：定义从哪里开始拿数据</p>
+<p>“size”:100 //size：定义一共拿多少条数据</p>
+<p>}</p>
+<p>查询流程如下：</p>
+<ol>
+<li>客户端发送请求到某个node节点。</li>
+<li>此node将请求广播到各分片，各分片各自查询前5100条数据</li>
+<li>查询结果返回给node节点，node对结果进行合并整合，取出前5100条数据</li>
+<li>返回给客户端</li>
+</ol>
+<p>深度分页查询的缺点也会非常明显：如果想要深度获取数据，性能问题会非常明显的暴露出来，CPU、内存、IO、网络带宽等等，而且Elasticsearch本身就是个java应用，若并发上去，Elasticsearch很快就会OOM</p>
+<p>4、scroll</p>
+<p>scroll可以理解为关系型数据库里的cursor，因此scroll并不适合做实时搜索，更适合于后台批处理任务，比如群发。</p>
+<p>scroll可以分为初始化和遍历两步，初始化时将所有符合搜索条件的搜索结果缓存起来，可以想象成快照，在遍历时，从这个快照里面取出数据，也就是说，在初始化后对索引插入、删除、更新数据都不会影响遍历结果。</p>
+<p>from + size 和scroll都需要执行多次fetch阶段，但是相比于from + size方式， scroll只做一次query阶段，一次将所有条件满足的结果取出来，缓存到内存中，然后每次请求都是内存的快照中找到需要的docid，然后去shards中获取数据。也就是说，from + size会query多次，分页的越多，query的条数就越多；而scroll一次会将全部数据取出，分页的深度对其没有影响。</p>
+</blockquote>
+<h4 id="5、项目中rabbitmq哪里用到了-做了什么"><a href="#5、项目中rabbitmq哪里用到了-做了什么" class="headerlink" title="5、项目中rabbitmq哪里用到了,做了什么?"></a>5、项目中rabbitmq哪里用到了,做了什么?</h4><blockquote>
+<p>1、es数据同步（异步双写）</p>
+<p>优点：性能高；不存在丢数据问题。</p>
+<p>缺点：硬编码问题：依然存在业务强耦合：依然存在复杂度增加：系统中增加了mq的代码，；可能存在时延问题：程序的写入性能提高了，但是由于MQ的消费可能由于网络或其它原因导致用户写入的数据不一定可以马上看到，造成延时。</p>
+<p>2、redis数据同步</p>
+</blockquote>
+<h4 id="6、http-与-https-的区别"><a href="#6、http-与-https-的区别" class="headerlink" title="6、http 与 https 的区别"></a>6、http 与 https 的区别</h4><blockquote>
+<p>1、HTTP<br>超文本传输协议HTTP协议也被用于WEB浏览器和网站服务器之间传递信息，HTTP协议以明文方式发送内容，不提供任何的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，就可以直接读懂其中的信息，因此，HTTP协议不适合传输一些敏感信息，比如：信用卡号、密码等支付信息。<br>2、HTTPS<br>是以安全为目标的HTTP通道，简单讲是HTTP的安全版，即HTTP下加入SSL层，HTTPS的安全基础是SSL，因此加密的详细内容就需要SSL。<br>3、HTTPS和HTTP的区别主要如下：<br>　　1、https协议需要到ca申请证书，一般免费证书较少，因而需要一定费用。</p>
+<p>　　2、http是超文本传输协议，信息是明文传输，https则是具有安全性的ssl加密传输协议。</p>
+<p>　　3、http和https使用的是完全不同的连接方式，用的端口也不一样，前者是80，后者是443。</p>
+<p>　　4、http的连接很简单，是无状态的；HTTPS协议是由SSL+HTTP协议构建的可进行加密传输、身份认证的网络协议，比http协议安全。</p>
+</blockquote>
+<h4 id="7、linux怎么查看日志的？"><a href="#7、linux怎么查看日志的？" class="headerlink" title="7、linux怎么查看日志的？"></a>7、linux怎么查看日志的？</h4><blockquote>
+<p>tail -f 日志文件</p>
+</blockquote>
+<h4 id="8、springboot是如何实现自动装配的"><a href="#8、springboot是如何实现自动装配的" class="headerlink" title="8、springboot是如何实现自动装配的"></a>8、springboot是如何实现自动装配的</h4><blockquote>
+<p>1、@Configuration(@SpringBootConfiguration就是一个@Configuration）</p>
+<pre class=" language-java"><code class="language-java"><span class="token annotation punctuation">@Configuration</span><span class="token comment" spellcheck="true">//标记这个类为注解类==配置文件</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">UserConfig</span> <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">/*
+     * @Bean代表给容器中注入一个Bean，类型为返回值得类型，id默认是方法名
+     * id也可以自己定义比如@Bean("user1")
+     */</span>
+    <span class="token annotation punctuation">@Bean</span>
+    <span class="token keyword">public</span> User <span class="token function">user</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        User user<span class="token operator">=</span><span class="token keyword">new</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        user<span class="token punctuation">.</span><span class="token function">setUserName</span><span class="token punctuation">(</span><span class="token string">"qiuzhangwei"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        user<span class="token punctuation">.</span><span class="token function">setPassword</span><span class="token punctuation">(</span><span class="token string">"123456"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        user<span class="token punctuation">.</span><span class="token function">setAge</span><span class="token punctuation">(</span><span class="token number">55</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        user<span class="token punctuation">.</span><span class="token function">setBrithday</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> user<span class="token punctuation">;</span>
+    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
 </code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><pre class=" language-bash"><code class="language-bash">$ hexo deploy
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<p>2、@EnableAutoConfiguration</p>
+<p>在spring中有关于@Enablexxx的注解是开启某一项功能的注解，比如@EnableScheduling表示开启spring的定时任务。其原理是借助@Import的帮助，将所有符合自动配置条件的bean定义加载到Ioc容器。</p>
+<p>3、@ComponentScan</p>
+<p>@ComponentScan的功能其实就是自动扫描并加载符合条件的组件或bean定义，最终将这些bean定义加载到容器中@EableAutoConfiguartion-&gt;Meta-INF/spring.factories文件中的EnableAutoConfiguration为key所有value生成对应的Bean对象</p>
+</blockquote>
+<p>​    </p>
+<h4 id="9、Redis的持久化，然后说一下各自优缺点"><a href="#9、Redis的持久化，然后说一下各自优缺点" class="headerlink" title="9、Redis的持久化，然后说一下各自优缺点"></a>9、Redis的持久化，然后说一下各自优缺点</h4><blockquote>
+<p>Redis 提供两种持久化机制 RDB 和 AOF 机制:</p>
+<p>1、RDBRedis DataBase)持久化方式：</p>
+<p>是指用数据集快照的方式半持久化模式) 记录 redis 数据库的所有键值对,在某个时间点将数据写入一个临时文件。持久化 结束后，用这个临时文件替换上次持久化的文件，达到数据恢复。</p>
+<p>优点：</p>
+<p>1、只有一个文件 dump.rdb，方便持久化。</p>
+<p>2、容灾性好，一个文件可以保存到安全的磁盘。</p>
+<p>3、性能最大化，fork 子进程来完成写操作，让主进程继续处理命令，所以是 IO 最大化。使用单独子进程来进行持久化，主进程不会进行任何 IO 操作，保证了 redis 的高性能。</p>
+<p>4.相对于数据集大时，比 AOF 的启动效率更高。</p>
+<p>缺点：</p>
+<p>1、数据安全性低。RDB 是间隔一段时间进行持久化，如果持久化之间 redis 发生 故障，会发生数据丢失。所以这种方式更适合数据要求不严谨的时候。</p>
+</blockquote>
+<blockquote>
+<p>1、AOFAppend-only file)持久化方式：</p>
+<p>是指所有的命令行记录以 redis 命令请 求协议的格式完全持久化存储)保存为 aof 文件。</p>
+<p>优点：</p>
+<p>1、数据安全，aof 持久化可以配置 appendfsync 属性，有 always，每进行一次 命令操作就记录到 aof 文件中一次。</p>
+<p>2、通过 append 模式写文件，即使中途服务器宕机，可以通过 redis-check-aof 工具解决数据一致性问题。</p>
+<p>3、AOF 机制的 rewrite 模式。AOF 文件没被 rewrite 之前（文件过大时会对命令 进行合并重写），可以删除其中的某些命令（比如误操作的 flushall）)</p>
+<p>缺点：</p>
+<p>1、AOF 文件比 RDB 文件大，且恢复速度慢。</p>
+<p>2、数据集大的时候，比 rdb 启动效率低</p>
+</blockquote>
+<h4 id="10、shiro是怎么做权限控制的"><a href="#10、shiro是怎么做权限控制的" class="headerlink" title="10、shiro是怎么做权限控制的"></a>10、shiro是怎么做权限控制的</h4><blockquote>
+<p>shiro 原理剖析：</p>
+<p>​    shiro的核心是java servlet规范中的filter，通过配置拦截器，使用拦截器链来拦截请求，如果允许访问，则通过。通常情况下，系统的登录、退出会配置拦截器。登录的时候，调用subject.login(token),token是用户验证信息，这个时候会在Realm中doGetAuthenticationInfo方法中进行认证。这个时候会把用户提交的验证信息与数据库中存储的认证信息进行比较，一致则允许访问，并在浏览器种下此次回话的cookie，在服务器端存储session信息。退出的时候，调用subject.logout()，会清除回话信息。</p>
+<p>Subject-&gt;SecurityMananger<br>        Authenticator-&gt;Realm-&gt;认证<br>        Authorizer-&gt;Realm-&gt;授权<br>        认证-》授权</p>
+</blockquote>
+<p>​    </p>
 
       </div>
       
@@ -462,7 +597,7 @@
     </li>
     <li class="post-copyright-link">
     <strong>文章链接:  </strong>
-    <a href="/DalyJiangBlog.github.io/2021/01/31/hello-world/" target="_blank" title="Hello World">https://admin981018.github.io/DalyJiangBlog.github.io/2021/01/31/hello-world/</a>
+    <a href="/DalyJiangBlog.github.io/2021/01/31/testing/" target="_blank" title="Testing">https://admin981018.github.io/DalyJiangBlog.github.io/2021/01/31/testing/</a>
     </li>
     <li class="post-copyright-license">
       <strong>版权声明:   </strong>
@@ -480,25 +615,23 @@
 
 
 
+
+
   
-  <div class="post-nav-prev post-nav-item">
-    <div class="post-nav-img lazyload" data-original="https://ssyerv1.oss-cn-hangzhou.aliyuncs.com/picture/c080ff4434354e35af9dab0a3ee1b9f7.jpg!sswm" style="background-size: cover; 
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img lazyload" data-original="/DalyJiangBlog.github.io/medias/7.jpg" style="background-size: cover; 
       background-position: center center;">
     </div>
-    <a href="/DalyJiangBlog.github.io/2021/01/31/testing/" class="post-nav-link">
+    <a href="/DalyJiangBlog.github.io/2021/01/31/hello-world/" class="post-nav-link">
       <div class="title">
-        <i class="fa fa-angle-left"></i> 上一篇:
-        <div>Testing</div>
+        下一篇: <i class="fa fa-angle-right"></i>
+        <div>Hello World</div>
       </div>
-      
       <!-- <div class="content">
-        我是文章内容
-1、消息队列消息重复问题如何解决？剖析：首先，比如rabbitmq, rocketmq, kafka, 都
+        Welcome to Hexo! This is your very first post. Check documen
       </div> -->
     </a>
   </div>
-
-
 
 </div>
 
